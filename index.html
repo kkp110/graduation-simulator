@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>各奔东西 · 毕业人生模拟器</title>
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fffef9;
+    --text: #3d3226;
+    --sub: #8b7355;
+    --gold: #c8963e;
+    --blue: #5b7fa5;
+    --green: #6b9b6b;
+    --red: #c46b6b;
+    --purple: #8b6b9b;
+    --bar-bg: #e8e0d5;
+    --shadow: 0 2px 16px rgba(60,40,20,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 440px;
+    min-height: 100dvh;
+    padding: 20px 16px 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== Particles ===== */
+  #particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    text-align: center;
+    padding: 10px 0 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .header .icon { font-size: 52px; display: block; animation: float 3s ease-in-out infinite; }
+  .header h1 { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: 2px; margin: 4px 0 0; }
+  .header .sub { font-size: 13px; color: var(--sub); letter-spacing: 4px; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* ===== Stage indicator ===== */
+  .stage-dots {
+    display: flex; justify-content: center; gap: 8px;
+    padding: 16px 0; position: relative; z-index: 1;
+  }
+  .stage-dots .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #d5ccc0; transition: all 0.4s;
+  }
+  .stage-dots .dot.done { background: var(--gold); }
+  .stage-dots .dot.active { background: var(--gold); transform: scale(1.5); box-shadow: 0 0 12px rgba(200,150,62,0.4); }
+
+  /* ===== Stats ===== */
+  .stats-panel {
+    background: var(--card); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow);
+    margin-bottom: 16px; position: relative; z-index: 1;
+  }
+  .stats-panel .title {
+    font-size: 12px; color: var(--sub); letter-spacing: 3px;
+    text-align: center; margin-bottom: 12px;
+  }
+  .stat-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row .emoji { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+  .stat-row .label { font-size: 13px; width: 36px; flex-shrink: 0; color: var(--text); }
+  .stat-row .bar-wrap {
+    flex: 1; height: 8px; background: var(--bar-bg); border-radius: 4px;
+    overflow: hidden; position: relative;
+  }
+  .stat-row .bar-fill {
+    height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+  .stat-row .bar-fill.w { background: linear-gradient(90deg, #d4a84b, #f0c060); }
+  .stat-row .bar-fill.c { background: linear-gradient(90deg, #5b8fb5, #7ab8e0); }
+  .stat-row .bar-fill.h { background: linear-gradient(90deg, #d4896b, #f0a080); }
+  .stat-row .bar-fill.n { background: linear-gradient(90deg, #7b9b6b, #a0c880); }
+  .stat-row .bar-fill.e { background: linear-gradient(90deg, #8b6ba0, #b890d0); }
+  .stat-row .val { font-size: 11px; color: var(--sub); width: 28px; text-align: right; flex-shrink: 0; }
+
+  /* ===== Card ===== */
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px 20px; box-shadow: var(--shadow);
+    position: relative; z-index: 1;
+    animation: cardIn 0.5s ease-out;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card .year-tag {
+    display: inline-block; background: var(--gold); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px;
+    letter-spacing: 2px; margin-bottom: 12px;
+  }
+  .card .scene {
+    font-size: 15px; line-height: 1.8; color: var(--text); margin-bottom: 8px;
+  }
+  .card .scene .highlight { color: var(--blue); font-weight: 600; }
+  .card .event-emoji { font-size: 40px; text-align: center; display: block; margin-bottom: 10px; }
+
+  /* ===== Choices ===== */
+  .choices {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-top: 18px; position: relative; z-index: 1;
+  }
+  .choice-btn {
+    background: var(--card); border: 2px solid #e8e0d5; border-radius: 14px;
+    padding: 14px 18px; font-size: 15px; color: var(--text);
+    text-align: left; cursor: pointer;
+    transition: all 0.2s; position: relative;
+    font-family: inherit; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .choice-btn:active {
+    transform: scale(0.97); border-color: var(--gold);
+    background: #fdf8ef;
+  }
+  .choice-btn .choice-emoji { font-size: 24px; flex-shrink: 0; }
+  .choice-btn .choice-text { flex: 1; }
+  .choice-btn .choice-hint {
+    font-size: 11px; color: var(--sub); display: block; margin-top: 2px;
+  }
+
+  /* ===== Event Popup ===== */
+  .event-popup {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center;
+    justify-content: center; z-index: 100;
+    animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .event-popup .popup-card {
+    background: #fffef9; border-radius: 20px; padding: 32px 24px;
+    margin: 20px; max-width: 360px; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.8) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .event-popup .pop-emoji { font-size: 64px; display: block; margin-bottom: 12px; }
+  .event-popup .pop-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .event-popup .pop-desc { font-size: 14px; color: var(--sub); line-height: 1.6; margin-bottom: 8px; }
+  .event-popup .pop-stat { font-size: 13px; margin: 4px 0; font-weight: 600; }
+  .event-popup .pop-stat.up { color: var(--green); }
+  .event-popup .pop-stat.down { color: var(--red); }
+  .event-popup .pop-btn {
+    margin-top: 16px; background: var(--gold); color: #fff; border: none;
+    padding: 12px 40px; border-radius: 24px; font-size: 16px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    letter-spacing: 2px; transition: all 0.2s;
+  }
+  .event-popup .pop-btn:active { transform: scale(0.95); opacity: 0.8; }
+
+  /* ===== Ending ===== */
+  .ending-card {
+    text-align: center;
+  }
+  .ending-card .ending-emoji {
+    font-size: 72px; display: block; margin-bottom: 8px;
+    animation: float 2s ease-in-out infinite;
+  }
+  .ending-card .ending-title {
+    font-size: 22px; font-weight: 800; margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+  .ending-card .ending-sub {
+    font-size: 13px; color: var(--sub); margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+  .ending-card .ending-desc {
+    font-size: 14px; line-height: 1.8; color: var(--text);
+    margin-bottom: 20px;
+  }
+  .ending-card .ending-stats {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .ending-card .end-stat {
+    text-align: center;
+  }
+  .ending-card .end-stat-val {
+    font-size: 28px; font-weight: 800;
+  }
+  .ending-card .end-stat-label {
+    font-size: 11px; color: var(--sub);
+  }
+  .share-btn {
+    background: var(--gold); color: #fff; border: none;
+    padding: 14px 36px; border-radius: 28px; font-size: 16px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    letter-spacing: 2px; transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(200,150,62,0.3);
+    width: 100%; max-width: 280px;
+  }
+  .share-btn:active { transform: scale(0.95); }
+  .replay-btn {
+    background: none; border: 2px solid #d5ccc0; color: var(--sub);
+    padding: 12px 32px; border-radius: 24px; font-size: 14px;
+    cursor: pointer; font-family: inherit; letter-spacing: 2px;
+    margin-top: 12px; transition: all 0.2s;
+  }
+  .replay-btn:active { border-color: var(--gold); color: var(--gold); }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #3d3226; color: #fff; padding: 10px 24px;
+    border-radius: 20px; font-size: 14px; z-index: 200;
+    animation: toastIn 0.3s, toastOut 0.3s 1.7s forwards;
+    pointer-events: none;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 360px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 18px 14px; }
+    .choice-btn { padding: 12px 14px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<div class="container" id="app">
+  <!-- Rendered by JS -->
+</div>
+
+<script>
+// ============ 粒子背景 (樱花 & 毕业帽) ============
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const EMOJIS = ['🌸', '🎓', '✨', '🍀', '📜', '💫', '🌿'];
+class Particle {
+  constructor() {
+    this.reset(true);
+  }
+  reset(init) {
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : -30;
+    this.size = 12 + Math.random() * 16;
+    this.speed = 0.3 + Math.random() * 0.8;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = 0.01 + Math.random() * 0.02;
+    this.opacity = 0.3 + Math.random() * 0.4;
+    this.emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+  }
+  update() {
+    this.y += this.speed;
+    this.wobble += this.wobbleSpeed;
+    this.x += Math.sin(this.wobble) * 0.3;
+    if (this.y > H + 40) { this.reset(false); }
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    ctx.font = `${this.size}px serif`;
+    ctx.fillText(this.emoji, this.x, this.y);
+    ctx.restore();
+  }
+}
+for (let i = 0; i < 28; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ============ 游戏数据 ============
+const TOTAL_STAGES = 7;
+
+// 随机事件库（学前教育/幼师专属）
+const RANDOM_EVENTS = [
+  { emoji:'👶', title:'人类幼崽行为大赏', desc:'班上有个小朋友把橡皮泥塞进了鼻子里，你哭笑不得地处理了半个小时。但当他说"老师你最好了"的时候，你觉得一切都值了。', stats:{幸福:8, 健康:-3} },
+  { emoji:'🎨', title:'环创大赛夺冠', desc:'你用废旧纸箱和颜料做的"海底世界"主题墙，在区级幼儿园环创比赛中拿了一等奖！园长在大会上表扬了你。', stats:{事业:10, 幸福:8} },
+  { emoji:'🤒', title:'流感季节', desc:'班里一半的小朋友都在感冒，你也被传染了。但请假？不存在的，配班老师也倒下了。', stats:{健康:-12, 事业:5, 幸福:-5} },
+  { emoji:'💌', title:'家长的感谢信', desc:'一位家长给你写了一封长长的感谢信，说孩子回家天天念叨"我们x老师"。你读着读着眼眶就红了。', stats:{幸福:15, 事业:5} },
+  { emoji:'📱', title:'家长群深夜@你', desc:'周五晚上十一点，家长群突然有人@你："老师，我家宝宝今天在幼儿园吃了几碗饭？" 你深吸一口气……', stats:{幸福:-8, 健康:-3} },
+  { emoji:'🎂', title:'班上小朋友给你过生日', desc:'不知道谁走漏了风声，全班小朋友一起给你唱了生日歌，还画了三十几张歪歪扭扭的贺卡。', stats:{幸福:12, 人脉:5} },
+  { emoji:'🏃', title:'体能觉醒', desc:'你开始坚持每天跟着小朋友一起做早操跑步，三个月后发现自己体能飙升，一口气上五楼不费劲。', stats:{健康:12, 幸福:5} },
+  { emoji:'💡', title:'教学灵感爆发', desc:'你设计的一个音乐律动游戏在抖音上意外火了，全国各地的幼师都来问你教程。你第一次感觉到自己的专业价值被看见。', stats:{事业:10, 人脉:8, 幸福:5} },
+  { emoji:'🎭', title:'专科同学聚会', desc:'三年同窗再聚首，有人在幼儿园当上了主班，有人专升本后在读研，有人转行做了别的。大家聊着各自的生活，感慨万千。', stats:{人脉:8, 幸福:6} },
+  { emoji:'🌧️', title:'公开课翻车', desc:'准备了两个星期的公开课，结果一个小朋友突然大哭要找妈妈，全班跟着哭成一片。督导的脸都绿了。但你学会了在尴尬中微笑。', stats:{幸福:-8, 事业:-3} },
+  { emoji:'🎁', title:'老园长的指点', desc:'一位快要退休的老园长跟你聊了很久，说了很多掏心窝子的话。你突然对这份职业有了更深的理解。', stats:{事业:8, 幸福:5, 人脉:3} },
+  { emoji:'🏠', title:'合租室友跑路了', desc:'合租的室友突然搬走，你一个人负担不起整套房租。成年人的崩溃从房租开始。', stats:{财富:-10, 幸福:-8, 健康:-3} },
+  { emoji:'🐹', title:'班级自然角', desc:'你养在教室自然角的小仓鼠生了一窝崽！小朋友们开心疯了，你忙着给仓鼠找新家。', stats:{幸福:8} },
+  { emoji:'📚', title:'考证之路', desc:'你咬咬牙报了普通话二甲/教师资格证/育婴师证的考试。白天上班晚上刷题，累但充实。', stats:{事业:8, 健康:-5, 财富:-3} },
+];
+
+// 游戏阶段数据（学前教育专科生视角）
+const STAGES = [
+  {
+    year: '2026 年夏 · 专科毕业',
+    scene: '2026 年 6 月。三年的学前时光匆匆而过。钢琴、舞蹈、美术、环创、五大领域……<span class="highlight">就在刚才，你站在毕业典礼上接过专科文凭</span>。班上 42 个女生和 7 个男生，哭成一团——宿舍的钥匙交了，琴房的琴盖合上了，手工教室的环创作品也拆了。擦干眼泪，你必须面对一个现实的问题：<span class="highlight">接下来，去哪里？</span>',
+    emoji: '🎓',
+    choices: [
+      { emoji:'📚', text:'专升本！继续读两年', hint:'拿到本科学历，未来的选择会更多。但要再啃两年书本，比同龄人晚就业', effects:{事业:8, 财富:-5, 人脉:10, 幸福:5, 健康:3} },
+      { emoji:'🏫', text:'去幼儿园当一线老师', hint:'直接入编或签合同，天天和小朋友在一起，累但踏实', effects:{事业:5, 财富:8, 幸福:8, 健康:-3, 人脉:3} },
+      { emoji:'🏢', text:'离开学前，去外面求职', hint:'投简历、跑面试，试试其他行业。专科文凭在市场上不太好看，但不试试怎么知道？', effects:{事业:8, 财富:5, 人脉:8, 幸福:-3, 健康:-3} },
+      { emoji:'🚀', text:'自己创业，开托管/绘本馆', hint:'学了三年总不能白学。开个小托管班、绘本馆或者亲子工作室，自己当老板', effects:{事业:10, 财富:-8, 人脉:12, 健康:-5, 幸福:5} },
+    ],
+  },
+  {
+    year: '2027 年 · 一年后',
+    scene: '毕业一年了。<span class="highlight">朋友圈里大家的生活开始分化——</span>有人升本后在本科院校里继续当学生，有人已经当上了配班老师每天发小朋友的日常，有人去了公司当打工人，还有人的小生意刚刚起步。你呢？',
+    emoji: '📅',
+    choices: [
+      { emoji:'📖', text:'疯狂考证，给自己加码', hint:'普通话二甲、教师资格证、蒙台梭利、育婴师……多一本证多一条路', effects:{事业:8, 人脉:3, 健康:-5, 幸福:-3} },
+      { emoji:'🧘', text:'适应节奏，先稳住再说', hint:'第一年最重要的是活下来，慢慢找到自己的节奏', effects:{健康:10, 幸福:8} },
+      { emoji:'🤝', text:'主动社交，认识各行各业的人', hint:'走出舒适圈，看看别人的活法，说不定会有新的方向', effects:{人脉:12, 事业:5, 财富:3} },
+      { emoji:'💻', text:'自学新技能（剪辑/运营/设计）', hint:'多学一门手艺总没错，也许能靠这个转行', effects:{事业:5, 财富:3, 幸福:3, 人脉:3} },
+    ],
+  },
+  {
+    year: '2028 年 · 两年后',
+    scene: '专科毕业后两年，<span class="highlight">你开始认真思考：自己到底想要什么？</span>升本的同学也要毕业了，去了幼儿园的朋友有的已经在考主班，转行的朋友有的混得不错有的灰头土脸。一个想法在你心里越来越清晰……',
+    emoji: '🔀',
+    choices: [
+      { emoji:'🔄', text:'下定决心，彻底换个赛道', hint:'学前教育不是唯一的路。去互联网、销售、新媒体，从头开始也好过纠结', effects:{事业:10, 幸福:8, 财富:5, 健康:-5, 人脉:-3} },
+      { emoji:'📈', text:'在学前教育领域深耕', hint:'专升本/积累经验后，争取当主班→年级组长→保教主任，一步一个脚印', effects:{事业:8, 财富:5, 幸福:3, 人脉:3} },
+      { emoji:'🏛️', text:'考编！考编！考编！', hint:'不管是幼儿园编还是其他事业单位，先进体制再说。铁饭碗的诱惑太大了', effects:{财富:8, 幸福:5, 事业:5, 人脉:-3, 健康:-3} },
+      { emoji:'🎨', text:'发展副业，做两手准备', hint:'白天上班/上学，晚上做自媒体、接环创私单、卖手工教具，给自己留条后路', effects:{幸福:8, 人脉:5, 财富:8, 事业:-3, 健康:-5} },
+    ],
+  },
+  {
+    year: '2030 年 · 四年后',
+    scene: '毕业四年了。<span class="highlight">你慢慢看清了生活的模样。</span>有人在幼儿园里成了骨干教师，有人专升本后又考了研，有人彻底转行当了白领，也有人在老家结了婚生了娃。<span class="highlight">同学群里说话的永远是那几个人</span>。这时候，一个重要的决定摆在你面前……',
+    emoji: '⚡',
+    choices: [
+      { emoji:'💼', text:'跳槽/转岗，追求更高的收入', hint:'不管在哪个行业，赚钱才是硬道理。跳槽涨薪，换个更好的平台', effects:{财富:15, 事业:10, 健康:-8, 幸福:-3} },
+      { emoji:'🏠', text:'攒钱买房/商量终身大事', hint:'人生进入下一个阶段了。结婚、买房、安定下来', effects:{财富:-12, 幸福:10, 人脉:3, 健康:-3} },
+      { emoji:'📚', text:'继续提升学历/读非全', hint:'专科始终是个坎。专升本后考研，或者读非全日制本科、在职硕士', effects:{事业:8, 人脉:5, 财富:-5, 健康:-5, 幸福:3} },
+      { emoji:'🌍', text:'去一个新城市重新开始', hint:'在同一个地方待腻了。去成都/杭州/深圳，换个城市呼吸不一样的空气', effects:{幸福:10, 事业:5, 人脉:8, 财富:-5, 健康:-3} },
+    ],
+  },
+  {
+    year: '2032 年 · 六年 · 十字路口',
+    scene: '<span class="highlight">你开始重新定义"好工作"和"好生活"。</span>是幼儿园里孩子们的笑脸？是写字楼里的工位和KPI？是体制内的安稳？还是自己小店的自由？当初一起毕业的那群人，每个人都有自己的答案——但没有谁的答案天然比别人的更正确。',
+    emoji: '🤔',
+    choices: [
+      { emoji:'🏆', text:'All in 事业，全力以赴拼一把', hint:'不管是当园长、升主管还是把生意做大，趁年轻拼一把', effects:{事业:15, 财富:10, 健康:-10, 幸福:-5, 人脉:5} },
+      { emoji:'⚖️', text:'工作和生活，我全都要', hint:'拒绝内卷，拒绝PUA，拿该拿的工资，过该过的日子', effects:{幸福:10, 健康:10, 事业:-3, 财富:-3} },
+      { emoji:'🌱', text:'回归初心，做真正有意义的事', hint:'投身乡村幼教、特殊教育、公益项目——用专业去温暖更多孩子', effects:{幸福:15, 人脉:8, 事业:-5, 财富:-8, 健康:3} },
+      { emoji:'💡', text:'把副业转正，做自由职业者', hint:'你的手工教具/绘本阅读/亲子课程已经有不少客户了，为什么不试试以此为生？', effects:{事业:5, 幸福:10, 财富:5, 人脉:5, 健康:-3} },
+    ],
+  },
+  {
+    year: '2034 年 · 八年聚会',
+    scene: '毕业八周年。有人组织了一场聚会。<span class="highlight">你发现每个人都在自己选择的道路上走了很远。</span>有人已经是幼儿园的保教主任，有人在互联网公司当上了小组长，有人专升本后又读了研现在在大学当老师，有人开了三家托育连锁店……当然也有人还在迷茫。大家聊着各自的故事，笑着笑着就沉默了。',
+    emoji: '🍻',
+    choices: [
+      { emoji:'🤗', text:'和每个老同学都好好聊聊', hint:'八年的故事，一晚上怎么说得完。听听别人的路，想想自己的', effects:{人脉:12, 幸福:8} },
+      { emoji:'🤝', text:'趁机聊聊合作的可能性', hint:'同学是最珍贵的人脉。有人缺老师，有人缺合伙人，有人有资源', effects:{事业:10, 财富:5, 人脉:5, 幸福:-3} },
+      { emoji:'📸', text:'拉着大家拍了很多合照', hint:'有些人可能十年后才能再见了。把这一刻留下来', effects:{幸福:10, 人脉:8} },
+      { emoji:'🍺', text:'不聊工作，只聊感情', hint:'去他的规划、去他的KPI。今晚只想和姐妹们痛快喝一场', effects:{幸福:12, 健康:-5} },
+    ],
+  },
+  {
+    year: '2036 年 · 十年之后',
+    scene: '<span class="highlight">专科毕业十年了。</span>你站在镜子前，看着里面那个成熟了许多的人。还记得当年在琴房里练儿歌、在手工教室做环创、在模拟教室里试讲的那个自己吗？<span class="highlight">你和十年前的自己，隔着十年的选择、努力、跌倒和爬起。</span>你想对十年前的自己说些什么？',
+    emoji: '🪞',
+    choices: [
+      { emoji:'😊', text:'"谢谢你当初选择了这条路"', hint:'不管走的是哪条路，每一个选择都让你成为了今天的自己', effects:{幸福:10, 事业:5} },
+      { emoji:'🤔', text:'"如果当初选了另一条路……"', hint:'人生没有如果，但偶尔想想平行宇宙里的自己，也很奇妙', effects:{幸福:-3, 事业:5, 人脉:5} },
+      { emoji:'😌', text:'"专科学历只是起点，不是终点"', hint:'你用十年证明了：起点不决定终点，走下去就对了', effects:{幸福:10, 事业:5, 健康:3} },
+      { emoji:'🔥', text:'"下一个十年，我还要继续折腾！"', hint:'三十出头，人生才刚刚进入精彩阶段。故事还长着呢', effects:{事业:10, 幸福:5, 健康:3} },
+    ],
+  },
+];
+
+// ============ 游戏状态 ============
+let game = {
+  stage: 0,
+  stats: { 财富: 50, 事业: 50, 幸福: 50, 人脉: 50, 健康: 50 },
+  history: [],
+  eventsTriggered: new Set(),
+  ended: false,
+  firstChoice: null,  // 'shenben' | 'youyuan' | 'zhuanhang' | 'chuangye'
+};
+
+function clamp(v) { return Math.max(5, Math.min(95, v)); }
+
+function applyEffects(effects) {
+  const changes = [];
+  for (const [key, delta] of Object.entries(effects)) {
+    const old = game.stats[key];
+    game.stats[key] = clamp(old + delta);
+    changes.push({ key, delta, newVal: game.stats[key] });
+  }
+  return changes;
+}
+
+// ============ 结局判定（14种结局） ============
+function getEnding() {
+  const s = game.stats;
+  const avg = (s.财富 + s.事业 + s.幸福 + s.人脉 + s.健康) / 5;
+  const p = game.firstChoice; // 'shenben' | 'youyuan' | 'zhuanhang' | 'chuangye'
+
+  // 1. 跨界精英 — 转行彻底成功
+  if (s.财富 >= 80 && s.事业 >= 75 && p === 'zhuanhang') return {
+    emoji:'🏆', title:'跨界精英', sub:'THE CROSSOVER ELITE',
+    desc:'三年前你说"学前教育不是唯一的路"，所有人都觉得你疯了。十年后你在新行业站稳了脚跟，成了团队里最被信任的那个人。大专文凭没有困住你——你用实力证明，起点从来不决定终点。只是偶尔路过一家幼儿园，听到里面传来的儿歌声，你还会不自觉地跟着哼两句。',
+    color:'#c8963e',
+  };
+
+  // 2. 逆袭女王 — 专升本后一路开挂
+  if (s.事业 >= 75 && s.财富 >= 65 && p === 'shenben') return {
+    emoji:'👑', title:'逆袭女王', sub:'THE COMEBACK QUEEN',
+    desc:'专升本→考研→更广阔的平台。从专科教室里那个默默练琴的学生，到如今让人刮目相看的你。十年间你打了无数人的脸——包括曾经不看好你的那些人，也包括曾经怀疑自己的那个你。学历这条路上，你走了最远的路，也看到了最美的风景。',
+    color:'#c8963e',
+  };
+
+  // 3. 孩子王 — 留在学前，幸福满满
+  if (s.幸福 >= 75 && s.人脉 >= 65 && s.健康 >= 60 && (p === 'youyuan' || s.幸福 >= 80)) return {
+    emoji:'👩‍🏫', title:'孩子王', sub:'THE KIDS\' FAVORITE',
+    desc:'你留在了学前教育领域，成了孩子们最喜欢的老师。也许已经是主班、年级组长，甚至业务园长。每天早上走进教室，三十几个小朋友喊着你的名字扑过来——你觉得世界上没有比这更好的工作了。那些说"幼师就是保姆"的人，从来没见过一个孩子因为你的引导而发生的改变。',
+    color:'#d4896b',
+  };
+
+  // 4. 创业达人 — 自己当老板
+  if (s.事业 >= 75 && s.人脉 >= 70 && s.财富 >= 55) return {
+    emoji:'🚀', title:'创业达人', sub:'THE FOUNDER',
+    desc:'你走了一条少有人走的路。也许开了自己的托育中心、绘本馆、亲子工作室，也许专升本后一路读到了研究生开始做教育研究，也许跨界做了完全不同的生意。大专三年给你的不只是专业技能，更是敢想敢干的勇气。你创造了自己的规则，也创造了属于自己的事业。',
+    color:'#5b7fa5',
+  };
+
+  // 5. 生活艺术家 — 赚不多但过得最好
+  if (s.幸福 >= 80 && s.健康 >= 70 && s.人脉 >= 60) return {
+    emoji:'🌈', title:'生活艺术家', sub:'THE ARTIST OF LIFE',
+    desc:'你也许没有赚到最多的钱，但你拥有让身边所有人都羡慕的生活状态。周末的阳台种满花草，假期去小众旅行地，朋友圈里全是美食和手工作品。专升本的同学羡慕你的洒脱，转行的同学羡慕你的笃定。你把平凡的日子过成了诗——这大概就是学前教育专业潜移默化给你的审美力。',
+    color:'#6b9b6b',
+  };
+
+  // 6. 体制内赢家 — 考编上岸
+  if (s.财富 >= 65 && s.健康 >= 60 && s.幸福 >= 50 && s.事业 >= 50) return {
+    emoji:'💼', title:'体制内赢家', sub:'THE STEADY WINNER',
+    desc:'你考编上岸了。专科生考编的路比本科生更窄，但你硬是挤了进去。不管是幼儿园事业编还是其他事业单位，你有了一个让父母安心的身份。工资不算高但福利不错，有公积金有年终奖，体面又稳定。偶尔你也想：如果当年选了更冒险的路会怎样？然后你看了看银行卡里的公积金余额，觉得这样也挺好。',
+    color:'#8b6ba0',
+  };
+
+  // 7. 学术之星 — 专升本→考研→学术路
+  if (s.事业 >= 70 && s.人脉 >= 65 && s.财富 < 60 && s.健康 >= 50 && (p === 'shenben' || s.事业 >= 75)) return {
+    emoji:'📚', title:'学术之星', sub:'THE SCHOLAR',
+    desc:'从专科到本科，从本科到硕士，甚至博士——你在学术这条路上走得比谁都远。当年的同学在幼儿园带孩子的时候你在写论文，她们在考编的时候你在做课题。有人不理解：读那么多书有什么用？你笑而不语。你知道，教育从来不只是带小朋友做游戏，还有更深的维度等待探索。',
+    color:'#5b7fa5',
+  };
+
+  // 8. 斜杠青年 — 多重身份，多元收入
+  if (s.财富 >= 65 && s.幸福 >= 70 && s.事业 >= 55 && avg >= 60) return {
+    emoji:'✨', title:'斜杠青年', sub:'THE SLASHIE',
+    desc:'白天你可能是个幼师/文员/运营，晚上和周末你是手工作坊主理人/自媒体博主/亲子活动策划师。你的收入来源比大多数同龄人都多元，朋友圈里永远猜不到你下个月又在折腾什么新项目。学前教育教给你的十八般武艺（弹琴、画画、手工、讲故事），全成了你的副业武器。谁说专科生没出路？你把路走出了花。',
+    color:'#6b9b6b',
+  };
+
+  // 9. 小镇之光 — 回乡也有好生活
+  if (s.健康 >= 75 && s.幸福 >= 70 && s.人脉 >= 50 && s.财富 < 70) return {
+    emoji:'🏡', title:'小镇之光', sub:'THE HOMETOWN LIGHT',
+    desc:'你回了老家——也许是县城，也许是镇子，也许是某个三线小城。你在当地的幼儿园或者小学当了老师，嫁了人或养了猫，周末和爸妈一起吃饭。大城市的同学在挤地铁的时候你在院子里晒太阳。有人觉得你"退了一步"，但你知道：生活不是一场竞赛，而是一场旅行。舒服就是最好的方向。',
+    color:'#d4896b',
+  };
+
+  // 10. 网红教师 — 抖音/小红书上火了
+  if (s.人脉 >= 80 && s.财富 >= 55 && s.事业 >= 55) return {
+    emoji:'📱', title:'网红教师', sub:'THE INFLUENCER TEACHER',
+    desc:'你发的"幼师的一天"vlog意外火了，或者你的手指谣/环创教程/绘本推荐在小红书上被疯狂收藏。几十万粉丝看着你每天在幼儿园的真实日常——有笑有泪有崩溃也有治愈。你成了"别人家的老师"，甚至开始接到品牌合作。学前教育专业的底色加上自媒体的翅膀，你飞到了自己都没想到的高度。',
+    color:'#c46b6b',
+  };
+
+  // 11. 温柔港湾 — 家庭为重，幸福自足
+  if (s.幸福 >= 75 && s.人脉 >= 55 && s.事业 < 60) return {
+    emoji:'💝', title:'温柔港湾', sub:'THE WARM HARBOR',
+    desc:'你的人生重心不在职场，而在家庭。也许你结了婚生了娃，也许你选择了一份轻松的工作，把更多时间留给了爱的人。同学聚会上有人聊KPI聊晋升，你聊的是宝宝的辅食和周末的露营。你的幸福不来自名片上的头衔，而来自每天晚饭桌上的笑声。学前教育专业教会你的耐心和温柔，全都用在了最爱的人身上。',
+    color:'#d4896b',
+  };
+
+  // 12. 自由灵魂 — 不走寻常路
+  if (s.事业 < 35 && s.财富 < 35 && s.幸福 > 50) return {
+    emoji:'🎭', title:'自由灵魂', sub:'THE FREE SPIRIT',
+    desc:'你彻底放飞了自我！也许银行账户不太好看，也许名片上的头衔不够响亮，但你的人生经历比谁都丰富。做过幼师又当过咖啡师，在民宿打过工又尝试做自媒体，去过大理摆摊也在海南冲过浪。学前教育教会你的手工和才艺，成了你行走江湖的独门武器。你用自己的方式定义了"成功"——活得尽兴，就是最大的成功。',
+    color:'#c46b6b',
+  };
+
+  // 13. 平凡英雄 — 稳稳的幸福
+  if (avg >= 50) return {
+    emoji:'🌟', title:'平凡英雄', sub:'THE EVERYDAY HERO',
+    desc:'你也许没有惊天动地的成就，但你认真地过好了每一天。从2026年那个夏天专科毕业时的一脸迷茫，到十年后镜子里的从容坚定。你关心身边的人，也被身边的人关心着。不管是带小朋友、做白领、开店还是读书——你用十年时间学会了最重要的一课：学前教育教给你的不只是专业技能，更是爱与被爱的能力。而这恰恰是过好这一生最重要的能力。',
+    color:'#7b9b6b',
+  };
+
+  // 14. 人生行者 — 还在路上
+  return {
+    emoji:'🎓', title:'人生行者', sub:'THE TRAVELER',
+    desc:'十年了，你还在路上。从学前教育专业出发，你走过了一些地方，换过几份工作，遇见了很多人——也告别了很多人。没有标准答案，没有终极目标，你只是认真地走着每一步。也许这就是人生最好的状态：永远在路上，永远有期待。就像当年在琴房里弹的那首《送别》，曲终人不散。下一个十年，故事继续。',
+    color:'#c8963e',
+  };
+}
+
+// ============ 渲染 ============
+const app = document.getElementById('app');
+
+function renderStats() {
+  const icons = { 财富:'💰', 事业:'🚀', 幸福:'😊', 人脉:'👥', 健康:'💪' };
+  const classes = { 财富:'w', 事业:'c', 幸福:'h', 人脉:'n', 健康:'e' };
+  const labels = { 财富:'财富', 事业:'事业', 幸福:'幸福', 人脉:'人脉', 健康:'健康' };
+  let html = '<div class="stats-panel"><div class="title">📊 当前状态</div>';
+  for (const key of ['财富','事业','幸福','人脉','健康']) {
+    const v = game.stats[key];
+    html += `
+      <div class="stat-row">
+        <span class="emoji">${icons[key]}</span>
+        <span class="label">${labels[key]}</span>
+        <div class="bar-wrap">
+          <div class="bar-fill ${classes[key]}" style="width:${v}%"></div>
+        </div>
+        <span class="val">${v}</span>
+      </div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderStageDots() {
+  let html = '<div class="stage-dots">';
+  for (let i = 0; i < TOTAL_STAGES; i++) {
+    let cls = '';
+    if (i < game.stage) cls = 'done';
+    else if (i === game.stage) cls = 'active';
+    html += `<div class="dot ${cls}"></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderHeader() {
+  return `
+    <div class="header">
+      <span class="icon">🎓</span>
+      <h1>各奔东西</h1>
+      <div class="sub">2026 届 · 学前教育 · 毕业快乐 🎓</div>
+    </div>`;
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2100);
+}
+
+function renderStage(stageData) {
+  let html = renderHeader();
+  html += renderStageDots();
+  html += renderStats();
+  html += `
+    <div class="card">
+      <span class="year-tag">${stageData.year}</span>
+      <span class="event-emoji">${stageData.emoji}</span>
+      <div class="scene">${stageData.scene}</div>
+    </div>
+    <div class="choices">
+  `;
+  stageData.choices.forEach((ch, i) => {
+    const hints = ch.hint ? `<span class="choice-hint">${ch.hint}</span>` : '';
+    html += `
+      <button class="choice-btn" data-choice="${i}">
+        <span class="choice-emoji">${ch.emoji}</span>
+        <span class="choice-text">${ch.text}${hints}</span>
+      </button>`;
+  });
+  html += '</div>';
+  app.innerHTML = html;
+
+  // 绑定事件
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.choice);
+      handleChoice(stageData, idx);
+    });
+  });
+}
+
+function showRandomEvent() {
+  // 选一个还没触发过的事件
+  const available = RANDOM_EVENTS.filter((_, i) => !game.eventsTriggered.has(i));
+  if (available.length === 0) return false;
+  const idx = RANDOM_EVENTS.indexOf(available[Math.floor(Math.random() * available.length)]);
+  const evt = RANDOM_EVENTS[idx];
+  game.eventsTriggered.add(idx);
+
+  const changes = applyEffects(evt.stats);
+  game.history.push({ type:'event', event: evt, changes });
+
+  const overlay = document.createElement('div');
+  overlay.className = 'event-popup';
+  let statLines = '';
+  changes.forEach(c => {
+    const cls = c.delta > 0 ? 'up' : 'down';
+    const sign = c.delta > 0 ? '+' : '';
+    const icons = { 财富:'💰', 事业:'🚀', 幸福:'😊', 人脉:'👥', 健康:'💪' };
+    statLines += `<div class="pop-stat ${cls}">${icons[c.key]} ${c.key} ${sign}${c.delta}</div>`;
+  });
+
+  overlay.innerHTML = `
+    <div class="popup-card">
+      <span class="pop-emoji">${evt.emoji}</span>
+      <div class="pop-title">${evt.title}</div>
+      <div class="pop-desc">${evt.desc}</div>
+      ${statLines}
+      <button class="pop-btn">知道了</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  return new Promise(resolve => {
+    overlay.querySelector('.pop-btn').addEventListener('click', () => {
+      overlay.remove();
+      resolve();
+    });
+  });
+}
+
+async function handleChoice(stageData, choiceIdx) {
+  const choice = stageData.choices[choiceIdx];
+  const changes = applyEffects(choice.effects);
+  game.history.push({ type:'choice', stage: game.stage, choice: choiceIdx, changes });
+
+  // 记录初始路线
+  if (game.stage === 0) {
+    const paths = ['shenben', 'youyuan', 'zhuanhang', 'chuangye'];
+    game.firstChoice = paths[choiceIdx];
+  }
+
+  game.stage++;
+
+  // 30% 概率触发随机事件 (第一关和最后一关不触发)
+  const shouldEvent = game.stage > 0 && game.stage < TOTAL_STAGES && Math.random() < 0.35;
+  if (shouldEvent) {
+    await showRandomEvent();
+  }
+
+  if (game.stage >= TOTAL_STAGES) {
+    renderEnding();
+  } else {
+    renderStage(STAGES[game.stage]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function renderEnding() {
+  game.ended = true;
+  const ending = getEnding();
+  const s = game.stats;
+
+  let html = renderHeader();
+  html += `
+    <div class="card ending-card">
+      <span class="ending-emoji">${ending.emoji}</span>
+      <div class="ending-title">${ending.title}</div>
+      <div class="ending-sub">${ending.sub}</div>
+      <div class="ending-desc">${ending.desc}</div>
+      <div class="ending-stats">
+        <div class="end-stat"><div class="end-stat-val" style="color:#c8963e">💰 ${s.财富}</div><div class="end-stat-label">财富</div></div>
+        <div class="end-stat"><div class="end-stat-val" style="color:#5b7fa5">🚀 ${s.事业}</div><div class="end-stat-label">事业</div></div>
+        <div class="end-stat"><div class="end-stat-val" style="color:#d4896b">😊 ${s.幸福}</div><div class="end-stat-label">幸福</div></div>
+        <div class="end-stat"><div class="end-stat-val" style="color:#6b9b6b">👥 ${s.人脉}</div><div class="end-stat-label">人脉</div></div>
+        <div class="end-stat"><div class="end-stat-val" style="color:#8b6ba0">💪 ${s.健康}</div><div class="end-stat-label">健康</div></div>
+      </div>
+      <button class="share-btn" onclick="shareResult()">📤 分享给同学</button>
+      <button class="replay-btn" onclick="resetGame()">🔄 再来一次</button>
+    </div>
+  `;
+  app.innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shareResult() {
+  const ending = getEnding();
+  const s = game.stats;
+  const text = `🎓 我在「各奔东西」毕业人生模拟器中走过了十年！
+
+我是2026届学前教育专科毕业生
+🏆 我的结局：${ending.title}
+
+💰 财富:${s.财富} 🚀 事业:${s.事业} 😊 幸福:${s.幸福}
+👥 人脉:${s.人脉} 💪 健康:${s.健康}
+
+你的十年后是什么样子？来试试吧！
+
+#毕业季 #各奔东西 #2026毕业 #人生模拟器`;
+
+  if (navigator.share) {
+    navigator.share({ title: '各奔东西 · 毕业人生模拟器', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已复制到剪贴板，分享给同学吧！');
+    }).catch(() => {
+      showToast('📤 长按截图分享给同学吧！');
+    });
+  }
+}
+
+function resetGame() {
+  game = {
+    stage: 0,
+    stats: { 财富: 50, 事业: 50, 幸福: 50, 人脉: 50, 健康: 50 },
+    history: [],
+    eventsTriggered: new Set(),
+    ended: false,
+  };
+  renderStage(STAGES[0]);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ 启动 ============
+renderStage(STAGES[0]);
+</script>
+
+</body>
+</html>
