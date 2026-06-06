@@ -41,7 +41,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100dvh;
+    min-height: 100vh; min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -54,7 +54,7 @@
   .container {
     width: 100%;
     max-width: 440px;
-    min-height: 100dvh;
+    min-height: 100vh; min-height: 100dvh;
     padding: 20px 16px 40px;
     display: flex;
     flex-direction: column;
@@ -279,9 +279,9 @@
   <!-- Rendered by JS -->
 </div>
 
-<!-- iOS 添加到主屏幕提示 -->
+<!-- 微信 / 浏览器分享提示 -->
 <div id="pwa-hint" style="display:none;position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#3d3226;color:#fff;padding:12px 20px;border-radius:24px;font-size:13px;z-index:300;white-space:nowrap;pointer-events:none;animation:toastIn 0.3s;text-align:center;">
-  💡 点击底部 <b>分享</b> → <b>添加到主屏幕</b><br>下次不联网也能玩
+  💡 点击右上角 <b>···</b> → <b>浮窗</b> 或 <b>收藏</b><br>下次从微信里直接打开接着玩
 </div>
 
 <script>
@@ -796,17 +796,31 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// iOS Safari "添加到主屏幕" 提示
+// 移动端提示：微信浮窗 / Safari添加到主屏幕
 (function() {
-  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-  const isSafari = /safari/.test(navigator.userAgent.toLowerCase()) && !/crios/.test(navigator.userAgent.toLowerCase());
+  const ua = navigator.userAgent.toLowerCase();
+  const isWeChat = /micromessenger/.test(ua);
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+  const isSafari = /safari/.test(ua) && !/crios/.test(ua) && !/micromessenger/.test(ua);
   const isStandalone = window.navigator.standalone;
-  if (isIOS && isSafari && !isStandalone) {
+  const isMobile = /mobile|android/.test(ua);
+
+  // 微信内：提示浮窗 / 浏览器：提示添加到桌面
+  if ((isWeChat || (isIOS && isSafari && !isStandalone) || (!isIOS && isMobile && !isWeChat)) && !isStandalone) {
     setTimeout(() => {
       const hint = document.getElementById('pwa-hint');
-      if (hint) { hint.style.display = 'block'; }
+      if (hint) {
+        if (isWeChat) {
+          hint.innerHTML = '💡 点右上角 <b>···</b> → <b>浮窗</b><br>随时回到游戏，不丢失进度';
+        } else if (isIOS) {
+          hint.innerHTML = '💡 点底部 <b>分享</b> → <b>添加到主屏幕</b><br>变成桌面 App，没网也能玩';
+        } else {
+          hint.innerHTML = '💡 点右上角菜单 → <b>添加到主屏幕</b><br>变成桌面 App，没网也能玩';
+        }
+        hint.style.display = 'block';
+      }
       setTimeout(() => { if (hint) hint.style.display = 'none'; }, 8000);
-    }, 3000);
+    }, 2000);
   }
 })();
 </script>
