@@ -4,13 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>各奔东西 · 毕业人生模拟器</title>
+<meta name="description" content="2026届学前教育毕业专属 · 10分钟体验毕业十年人生。专升本、当幼师、跨行求职、自主创业……14种结局等你解锁！">
+
+<!-- PWA / 离线支持 -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#c8963e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="各奔东西">
+<meta name="mobile-web-app-capable" content="yes">
+
 <!-- OpenGraph / 微信分享卡片 -->
 <meta property="og:title" content="各奔东西 · 毕业人生模拟器">
 <meta property="og:description" content="2026届学前教育 · 从专科毕业走向十年后的自己。专升本、幼儿园、转行、创业——你选哪条路？">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN01d4Yq7k1QiMQWfILKB_!!6000000002012-2-tps-200-200.png">
 <meta name="twitter:card" content="summary">
-<meta name="description" content="2026届学前教育毕业专属 · 10分钟体验毕业十年人生。专升本、当幼师、跨行求职、自主创业……14种结局等你解锁！">
 <style>
   :root {
     --bg: #f5f0e8;
@@ -269,6 +277,11 @@
 
 <div class="container" id="app">
   <!-- Rendered by JS -->
+</div>
+
+<!-- iOS 添加到主屏幕提示 -->
+<div id="pwa-hint" style="display:none;position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#3d3226;color:#fff;padding:12px 20px;border-radius:24px;font-size:13px;z-index:300;white-space:nowrap;pointer-events:none;animation:toastIn 0.3s;text-align:center;">
+  💡 点击底部 <b>分享</b> → <b>添加到主屏幕</b><br>下次不联网也能玩
 </div>
 
 <script>
@@ -770,6 +783,32 @@ function resetGame() {
 
 // ============ 启动 ============
 renderStage(STAGES[0]);
+
+// ============ PWA 离线支持 ============
+// 注册 Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).then(reg => {
+      console.log('✅ SW 已注册，离线可用:', reg.scope);
+    }).catch(err => {
+      console.log('SW 注册失败（非 HTTPS 环境忽略）:', err.message);
+    });
+  });
+}
+
+// iOS Safari "添加到主屏幕" 提示
+(function() {
+  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const isSafari = /safari/.test(navigator.userAgent.toLowerCase()) && !/crios/.test(navigator.userAgent.toLowerCase());
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && isSafari && !isStandalone) {
+    setTimeout(() => {
+      const hint = document.getElementById('pwa-hint');
+      if (hint) { hint.style.display = 'block'; }
+      setTimeout(() => { if (hint) hint.style.display = 'none'; }, 8000);
+    }, 3000);
+  }
+})();
 </script>
 
 </body>

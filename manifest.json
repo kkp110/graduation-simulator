@@ -1,0 +1,17 @@
+{
+  "name": "各奔东西 · 毕业人生模拟器",
+  "short_name": "各奔东西",
+  "description": "2026届学前教育 · 毕业十年人生模拟",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f0e8",
+  "theme_color": "#c8963e",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
