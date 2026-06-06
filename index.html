@@ -339,30 +339,86 @@ animateParticles();
 // ============ 游戏数据 ============
 const TOTAL_STAGES = 9;
 
-// 随机事件库（学前教育/幼师专属）
-const RANDOM_EVENTS = [
-  { emoji:'👶', title:'人类幼崽行为大赏', desc:'班上有个小朋友把橡皮泥塞进了鼻子里，你哭笑不得地处理了半个小时。但当他说"老师你最好了"的时候，你觉得一切都值了。', stats:{幸福:8, 健康:-3} },
-  { emoji:'🎨', title:'环创大赛夺冠', desc:'你用废旧纸箱和颜料做的"海底世界"主题墙，在区级幼儿园环创比赛中拿了一等奖！园长在大会上表扬了你。', stats:{事业:10, 幸福:8} },
-  { emoji:'🤒', title:'流感季节', desc:'班里一半的小朋友都在感冒，你也被传染了。但请假？不存在的，配班老师也倒下了。', stats:{健康:-12, 事业:5, 幸福:-5} },
-  { emoji:'💌', title:'家长的感谢信', desc:'一位家长给你写了一封长长的感谢信，说孩子回家天天念叨"我们x老师"。你读着读着眼眶就红了。', stats:{幸福:15, 事业:5} },
-  { emoji:'📱', title:'家长群深夜@你', desc:'周五晚上十一点，家长群突然有人@你："老师，我家宝宝今天在幼儿园吃了几碗饭？" 你深吸一口气……', stats:{幸福:-8, 健康:-3} },
-  { emoji:'🎂', title:'班上小朋友给你过生日', desc:'不知道谁走漏了风声，全班小朋友一起给你唱了生日歌，还画了三十几张歪歪扭扭的贺卡。', stats:{幸福:12, 人脉:5} },
-  { emoji:'🏃', title:'体能觉醒', desc:'你开始坚持每天跟着小朋友一起做早操跑步，三个月后发现自己体能飙升，一口气上五楼不费劲。', stats:{健康:12, 幸福:5} },
-  { emoji:'💡', title:'教学灵感爆发', desc:'你设计的一个音乐律动游戏在抖音上意外火了，全国各地的幼师都来问你教程。你第一次感觉到自己的专业价值被看见。', stats:{事业:10, 人脉:8, 幸福:5} },
-  { emoji:'🎭', title:'专科同学聚会', desc:'三年同窗再聚首，有人在幼儿园当上了主班，有人专升本后在读研，有人转行做了别的。大家聊着各自的生活，感慨万千。', stats:{人脉:8, 幸福:6} },
-  { emoji:'🌧️', title:'公开课翻车', desc:'准备了两个星期的公开课，结果一个小朋友突然大哭要找妈妈，全班跟着哭成一片。督导的脸都绿了。但你学会了在尴尬中微笑。', stats:{幸福:-8, 事业:-3} },
-  { emoji:'🎁', title:'老园长的指点', desc:'一位快要退休的老园长跟你聊了很久，说了很多掏心窝子的话。你突然对这份职业有了更深的理解。', stats:{事业:8, 幸福:5, 人脉:3} },
-  { emoji:'🏠', title:'合租室友跑路了', desc:'合租的室友突然搬走，你一个人负担不起整套房租。成年人的崩溃从房租开始。', stats:{财富:-10, 幸福:-8, 健康:-3} },
-  { emoji:'🐹', title:'班级自然角', desc:'你养在教室自然角的小仓鼠生了一窝崽！小朋友们开心疯了，你忙着给仓鼠找新家。', stats:{幸福:8} },
-  { emoji:'📚', title:'考证之路', desc:'你咬咬牙报了普通话二甲/教师资格证/育婴师证的考试。白天上班晚上刷题，累但充实。', stats:{事业:8, 健康:-5, 财富:-3} },
-  { emoji:'🎤', title:'偶然的演讲机会', desc:'你被临时拉去在一个活动上分享经验，紧张到手心冒汗，结果讲完之后好几个人加你微信说"讲得真好"。你发现自己原来有演讲的天赋。', stats:{事业:8, 人脉:8, 幸福:5} },
-  { emoji:'✈️', title:'出国的橄榄枝', desc:'一个偶然的机会——也许是学校项目、也许是朋友推荐——你有机会去国外待一段时间。去还是不去？', stats:{人脉:12, 事业:5, 财富:-8, 幸福:8, 健康:-3} },
-  { emoji:'🎨', title:'副业的第一桶金', desc:'你随便挂着卖的手工作品居然被人拍下了！虽然只赚了一点点，但这种"靠自己喜欢的事赚钱"的感觉太爽了。', stats:{财富:8, 幸福:10, 事业:3} },
-  { emoji:'💻', title:'线上课程走红', desc:'你在B站/抖音上传的一个教学视频突然被推荐了，一夜之间涨了几万粉。你意识到，你的舞台可能不止在一间教室里。', stats:{人脉:10, 事业:8, 幸福:6} },
-  { emoji:'🤝', title:'猎头找上门', desc:'一个猎头在招聘平台上看到了你的简历，主动联系你推荐了一个不错的机会。这是你第一次意识到：原来自己也是有市场价值的。', stats:{事业:12, 财富:5, 幸福:5} },
-  { emoji:'🏦', title:'意外之财', desc:'你随手买的一笔理财/基金/股票居然涨了不少。虽然金额不大，但这种"钱生钱"的感觉让你开始对理财产生兴趣。', stats:{财富:10, 幸福:5} },
-  { emoji:'🌍', title:'大城市VS小城市', desc:'你去了一趟大城市/小城市/乡下之后，突然对"住在哪里"这件事有了新的想法。也许你属于一个你还没去过的地方。', stats:{幸福:5, 事业:3, 人脉:5} },
+// ===== 通用随机事件（所有路线都可能触发） =====
+const COMMON_EVENTS = [
+  { emoji:'🏃', title:'运动觉醒', desc:'你开始坚持运动，三个月后发现自己体能飙升，整个人都充满能量。', stats:{健康:12, 幸福:5} },
+  { emoji:'🎂', title:'生日惊喜', desc:'你以为大家都忘了，结果朋友们准备了惊喜。被人放在心上的感觉真好。', stats:{幸福:10, 人脉:5} },
+  { emoji:'🏠', title:'搬家风波', desc:'房东突然要卖房/室友跑路/楼上装修太吵——成年人搬家总是猝不及防。但新家新气象！', stats:{财富:-8, 幸福:-5, 健康:-3} },
+  { emoji:'🎭', title:'老同学偶遇', desc:'在街上/机场/火车站偶遇了当年的同学。两年没见，聊了一整个下午，感慨万千。', stats:{人脉:8, 幸福:6} },
+  { emoji:'🏦', title:'意外小财', desc:'一笔意料之外的钱——也许是理财收益、也许是退税、也许是兼职收入。数额不大但很开心。', stats:{财富:10, 幸福:5} },
+  { emoji:'🌍', title:'旅行的启发', desc:'一趟短途旅行让你对"住在哪里、过什么生活"有了新的想法。也许你属于一个还没去过的地方。', stats:{幸福:5, 事业:3, 人脉:5} },
+  { emoji:'🎤', title:'被看见的时刻', desc:'你在某个场合的表达/展示/分享打动了在场的人，好几个人主动加你微信说"讲得真好"。', stats:{事业:8, 人脉:8, 幸福:5} },
+  { emoji:'🎁', title:'贵人的指点', desc:'一位前辈跟你聊了很久，说了很多掏心窝子的话。你突然对自己在做的事有了更深的理解。', stats:{事业:8, 幸福:5, 人脉:3} },
 ];
+
+// ===== 路径专属随机事件 =====
+const PATH_EVENTS = {
+  // 🏫 学前教育路线
+  preschool: [
+    { emoji:'👶', title:'人类幼崽行为大赏', desc:'小朋友把橡皮泥塞进鼻子里，你哭笑不得地处理了半天。但当他说"老师你最好了"的时候，一切值得。', stats:{幸福:8, 健康:-3} },
+    { emoji:'🎨', title:'环创大赛拿了奖', desc:'你用废旧材料做的主题墙在区级环创比赛中拿了一等奖！园长在大会上表扬了你。', stats:{事业:10, 幸福:8} },
+    { emoji:'💌', title:'家长的长信', desc:'一位家长写了长长的感谢信，说孩子回家天天念叨你。你读着读着眼眶就红了。', stats:{幸福:15, 事业:5} },
+    { emoji:'📱', title:'家长群深夜@', desc:'周五晚十一点，家长群突然有人@你："老师我家宝宝今天吃了几碗饭？"你深吸一口气……', stats:{幸福:-8, 健康:-3} },
+    { emoji:'🌧️', title:'公开课翻车', desc:'准备了两个星期的公开课，一个小朋友突然大哭找妈妈，全班跟着哭。督导脸都绿了。但你学会了在尴尬中微笑。', stats:{幸福:-8, 事业:-3} },
+    { emoji:'🎁', title:'老园长的掏心话', desc:'快要退休的老园长跟你聊了很久。你突然对这份职业有了更深的理解。', stats:{事业:8, 幸福:5, 人脉:3} },
+  ],
+
+  // 💼 职场打拼路线
+  corporate: [
+    { emoji:'🤝', title:'猎头找上门', desc:'一个猎头在招聘平台看到你，推荐了一个不错的职位。你第一次意识到：自己是有市场价值的。', stats:{事业:12, 财富:5, 幸福:5} },
+    { emoji:'📊', title:'项目大获成功', desc:'你负责的项目/方案得到了大老板的认可，在全公司大会上被点名表扬。', stats:{事业:15, 财富:5, 人脉:3} },
+    { emoji:'💼', title:'跳槽涨薪', desc:'朋友内推了一个机会，犹豫再三后你接了offer。新环境、新挑战、新的发展空间。', stats:{财富:15, 事业:8, 人脉:3, 健康:-5} },
+    { emoji:'🌧️', title:'项目搞砸了', desc:'一个重要的项目出了纰漏。你在天台上吹了很久的风。但你知道，明天太阳还会升起。', stats:{幸福:-10, 事业:-5} },
+    { emoji:'🗣️', title:'办公室政治', desc:'你无意中卷入了一场办公室斗争。虽然头疼，但你也学会了职场的另一课。', stats:{事业:3, 人脉:5, 幸福:-8, 健康:-3} },
+    { emoji:'🏆', title:'年终奖超预期', desc:'你这一年的努力被看见了。年终考核优秀，奖金比预期的多了一倍。', stats:{财富:12, 事业:5, 幸福:8} },
+  ],
+
+  // 🚀 创业路线
+  startup: [
+    { emoji:'💰', title:'第一笔大单', desc:'一个你盯了很久的客户终于签了合同！金额不大，但对你来说是里程碑。', stats:{财富:12, 事业:10, 幸福:8} },
+    { emoji:'🤯', title:'合伙人吵架', desc:'你和合伙人在关键决策上产生了严重分歧。吵完之后你们在路边摊喝到凌晨，决定再坚持一下。', stats:{幸福:-8, 事业:5, 人脉:5} },
+    { emoji:'🌟', title:'意外曝光', desc:'你的项目/产品被一个博主自发推荐了，突然涌进来大量客户，你手忙脚乱但兴奋得睡不着。', stats:{人脉:12, 事业:10, 财富:8, 健康:-5} },
+    { emoji:'📉', title:'至暗时刻', desc:'资金快断了，客户在流失，你一个人在深夜的办公室里盯着天花板。但你没有放弃。', stats:{幸福:-12, 财富:-8, 事业:5} },
+    { emoji:'🤝', title:'投资人感兴趣', desc:'一个投资人通过介绍找到你，聊了两个小时后说"有戏"。虽然还没拿到钱，但你看到了更大的可能。', stats:{事业:15, 人脉:10, 财富:5} },
+    { emoji:'💡', title:'灵光一闪', desc:'深夜失眠时你突然有了一个好点子，马上爬起来记在备忘录里。这个点子后来改变了公司的方向。', stats:{事业:12, 幸福:8, 财富:5} },
+  ],
+
+  // 📚 学术深造路线
+  academic: [
+    { emoji:'📝', title:'论文被接收了', desc:'你投出去的论文收到了录用通知！几个月的努力终于有了回报。导师说"不错"。', stats:{事业:12, 幸福:10} },
+    { emoji:'🎓', title:'升学成功', desc:'你收到了录取通知书！从专科一路走来，每一步都算数。朋友圈发出去收获了最多的赞。', stats:{事业:15, 幸福:12, 人脉:5} },
+    { emoji:'📚', title:'深夜自习室的战友', desc:'在自习室/图书馆认识了一群和你一样努力的人。你们互相打气，成了最珍贵的战友。', stats:{人脉:10, 幸福:8, 事业:3} },
+    { emoji:'😰', title:'考试焦虑期', desc:'重要考试前你焦虑到失眠，甚至怀疑自己的选择。但考完之后发现，其实没那么可怕。', stats:{健康:-8, 幸福:-5, 事业:5} },
+    { emoji:'🎤', title:'学术会议上的一鸣惊人', desc:'你在学术会议上做的报告引起了不小的关注，好几位教授主动跟你交流。', stats:{事业:10, 人脉:12, 幸福:5} },
+  ],
+
+  // 🎨 内容创作/自媒体路线
+  creative: [
+    { emoji:'🔥', title:'内容一夜爆火', desc:'你发的一条内容突然被推荐算法选中，播放量/阅读量飙升。手机不停震动，你感受到了流量的魔力。', stats:{人脉:15, 事业:8, 幸福:8} },
+    { emoji:'💼', title:'品牌合作找上门', desc:'有品牌方私信你想合作推广。虽然金额不大，但这是你第一次靠内容赚到钱！', stats:{财富:10, 事业:8, 幸福:10} },
+    { emoji:'😞', title:'创作瓶颈期', desc:'你盯着空白的屏幕/画布发呆了很久。灵感好像枯竭了，你开始怀疑自己适不适合走这条路。', stats:{幸福:-10, 事业:-5, 健康:-5} },
+    { emoji:'💌', title:'粉丝的暖心留言', desc:'一条长长的私信让你红了眼眶："你的内容陪我度过了最难的时候，谢谢你。"', stats:{幸福:15, 事业:3} },
+    { emoji:'🤝', title:'同行合作邀约', desc:'一个你欣赏了很久的同行主动邀请你合作。你们一拍即合，碰撞出了很棒的火花。', stats:{人脉:10, 事业:8, 幸福:8, 财富:5} },
+  ],
+
+  // 🏛️ 体制/编制路线
+  civil: [
+    { emoji:'📋', title:'顺利通过考察', desc:'公示期结束，你正式入编了。父母在电话那头高兴得说不出话。你知道，人生稳了。', stats:{财富:8, 幸福:10, 事业:5} },
+    { emoji:'📈', title:'意外被提拔', desc:'单位搞竞聘，你抱着试试看的心态报了名，结果居然选上了。你成了同一批里最先升职的。', stats:{事业:12, 财富:5, 人脉:5} },
+    { emoji:'😴', title:'日复一日的倦怠', desc:'每天朝九晚五，事情不多也不少。你开始怀疑自己是不是在浪费青春。但转念一想——稳定何尝不是一种幸福。', stats:{幸福:-5, 事业:-3, 健康:5} },
+    { emoji:'🎯', title:'借调机会来了', desc:'上级单位来借调人，领导推荐了你。新环境新挑战，也意味着新的可能性。', stats:{事业:10, 人脉:8, 财富:3, 幸福:3} },
+    { emoji:'🏠', title:'分房/安家福利', desc:'单位的安家政策下来了——也许是住房补贴、也许是公积金优惠、也许是周转房。你在这个城市终于有了根。', stats:{财富:12, 幸福:10, 健康:5} },
+  ],
+
+  // ✈️ 海外路线
+  abroad: [
+    { emoji:'🛂', title:'签证终于过了', desc:'经历了漫长的准备和忐忑的等待，签证获批的那一刻你差点哭出来。新的篇章要开始了。', stats:{幸福:15, 事业:5, 财富:-5} },
+    { emoji:'🗣️', title:'语言突破', desc:'有一天你突然发现：自己能不假思索地用外语交流了。那种自由的感觉无法形容。', stats:{事业:10, 幸福:10, 人脉:5} },
+    { emoji:'😢', title:'文化冲击后的孤独', desc:'语言不通、习惯不同、举目无亲。你在出租屋里哭了。但你告诉自己：走出来的人，都能扛过去。', stats:{幸福:-12, 健康:-5, 事业:5} },
+    { emoji:'💕', title:'异国他乡的温暖', desc:'一个陌生人/邻居/同事在你最需要帮助的时候伸出了手。你感受到了超越国界的善意。', stats:{幸福:12, 人脉:10} },
+    { emoji:'🌟', title:'找到自己的位置', desc:'你终于在异国找到了属于自己的节奏——也许是工作、也许是学业、也许只是一家每周必去的咖啡馆。你不再是一个游客了。', stats:{幸福:10, 事业:8, 人脉:8, 健康:5} },
+  ],
+};
 
 // 游戏阶段数据（学前教育专科生视角 · 9关）
 const STAGES = [
@@ -407,10 +463,11 @@ const STAGES = [
     scene: '专科毕业后两年，<span class="highlight">你开始认真思考：自己到底想要什么？</span>升本的同学也要毕业了又开始找工作，去了幼儿园的朋友有的已经在考主班资格，转行的朋友有的混得风生水起有的灰头土脸回了老家。一个想法在你心里越来越清晰……',
     emoji: '🔀',
     choices: [
-      { emoji:'🔄', text:'下定决心，彻底换个赛道', hint:'学前教育不是唯一的路。去互联网、销售、新媒体，从头开始也好过纠结', effects:{事业:10, 幸福:8, 财富:5, 健康:-5, 人脉:-3} },
-      { emoji:'📈', text:'在学前教育领域深耕', hint:'专升本/积累经验后，争取当主班→年级组长→保教主任，一步一个脚印', effects:{事业:8, 财富:5, 幸福:3, 人脉:3} },
-      { emoji:'🏛️', text:'考编！考编！考编！', hint:'不管是幼儿园编还是其他事业单位，先进体制再说。铁饭碗的诱惑太大了', effects:{财富:8, 幸福:5, 事业:5, 人脉:-3, 健康:-3} },
-      { emoji:'🎨', text:'发展副业，做两手准备', hint:'白天上班/上学，晚上做自媒体、接环创私单、卖手工教具，给自己留条后路', effects:{幸福:8, 人脉:5, 财富:8, 事业:-3, 健康:-5} },
+      { emoji:'🔄', text:'下定决心，彻底换个赛道', hint:'学前教育不是唯一的路。互联网、销售、新媒体——广阔天地从头开始', effects:{事业:10, 幸福:8, 财富:5, 健康:-5, 人脉:-3} },
+      { emoji:'📈', text:'在学前/教育领域深耕', hint:'专升本后争取更好的平台，或积累经验考主班→保教主任，一步一个脚印', effects:{事业:8, 财富:5, 幸福:3, 人脉:3} },
+      { emoji:'🏛️', text:'考编！考编！考编！', hint:'不管是幼儿园编、小学编还是其他事业单位，先进体制。铁饭碗太香了', effects:{财富:8, 幸福:5, 事业:5, 人脉:-3, 健康:-3} },
+      { emoji:'🎨', text:'发展副业，做两手准备', hint:'白天上班/上学，晚上做自媒体、接私单、卖手工。给自己留条后路', effects:{幸福:8, 人脉:5, 财富:8, 事业:-3, 健康:-5} },
+      { emoji:'💻', text:'自学编程/设计，转行互联网', hint:'报个培训班或者自学。虽然累，但这个行业不看学历看能力', effects:{事业:12, 财富:3, 人脉:5, 健康:-8, 幸福:-3} },
     ],
   },
   {
@@ -418,10 +475,11 @@ const STAGES = [
     scene: '毕业三年了。<span class="highlight">你不再是菜鸟，但也还没成为大佬。</span>当初一起毕业的人，有人买了人生第一套房（虽然是老家的），有人专升本后又考上了研，有人在幼儿园已经能独当一面，也有人裸辞了在出租屋里躺了三个月。夜深人静时你偶尔会想：<span class="highlight">这就是我想要的生活吗？</span>你决定……',
     emoji: '🌓',
     choices: [
-      { emoji:'💼', text:'准备跳槽/转型，主动出击', hint:'与其在舒适区里温水煮青蛙，不如主动求变。更新简历，开始面试', effects:{财富:12, 事业:10, 幸福:3, 健康:-5} },
+      { emoji:'💼', text:'准备跳槽/转型，主动出击', hint:'与其温水煮青蛙，不如主动求变。更新简历、找猎头、开始面试', effects:{财富:12, 事业:10, 幸福:3, 健康:-5} },
       { emoji:'📈', text:'在原路上深耕，相信积累的力量', hint:'任何行业都需要沉淀。三年是个坎，坚持过去可能就是质变', effects:{事业:8, 财富:5, 幸福:3, 人脉:3, 健康:3} },
-      { emoji:'🏠', text:'考虑结婚/安家，人生进入下一阶段', hint:'稳定下来，把根扎下去。同学里已经有人开始发喜帖了', effects:{幸福:10, 财富:-8, 人脉:3, 事业:-3, 健康:3} },
-      { emoji:'🎒', text:'给自己一个缓冲期，重新思考方向', hint:'去旅行、做义工、尝试不同的工作。不急着有答案，先去经历', effects:{幸福:10, 人脉:8, 事业:-5, 财富:-5, 健康:5} },
+      { emoji:'🏠', text:'考虑结婚/安家，定下来', hint:'稳定下来，把根扎下去。同学里已经有人开始发喜帖了', effects:{幸福:10, 财富:-8, 人脉:3, 事业:-3, 健康:3} },
+      { emoji:'🎒', text:'给自己一个缓冲期，重新想想方向', hint:'去旅行、做义工、体验不同的工作。不急着有答案，先去经历', effects:{幸福:10, 人脉:8, 事业:-5, 财富:-5, 健康:5} },
+      { emoji:'🏪', text:'投点小钱做个小生意/投资', hint:'开个网店、加盟个小项目、或者正经学学理财。试试水', effects:{财富:8, 事业:5, 人脉:5, 幸福:3, 健康:-3} },
     ],
   },
   {
@@ -477,7 +535,8 @@ let game = {
   history: [],
   eventsTriggered: new Set(),
   ended: false,
-  firstChoice: null,  // 'shenben' | 'youyuan' | 'zhuanhang' | 'chuangye'
+  firstChoice: null,  // 'shenben' | 'youyuan' | 'zhuanhang' | 'chuangye' | 'chuguo'
+  playerPath: 'explore',  // 当前路线：preschool | corporate | startup | academic | creative | civil | abroad | explore
 };
 
 function clamp(v) { return Math.max(5, Math.min(95, v)); }
@@ -496,24 +555,25 @@ function applyEffects(effects) {
 function getEnding() {
   const s = game.stats;
   const avg = (s.财富 + s.事业 + s.幸福 + s.人脉 + s.健康) / 5;
-  const p = game.firstChoice; // 'shenben' | 'youyuan' | 'zhuanhang' | 'chuangye' | 'chuguo'
+  const p = game.firstChoice; // 'academic' | 'preschool' | 'corporate' | 'startup' | 'abroad'
+  const cp = game.playerPath; // 最终路径（可能和初始不同）
 
   // === 高成就类 ===
 
   // 1. 跨界精英 — 转行彻底成功
-  if (s.财富 >= 82 && s.事业 >= 76 && p === 'zhuanhang') return {
+  if (s.财富 >= 82 && s.事业 >= 76 && p === 'corporate') return {
     emoji:'🏆', title:'跨界精英', sub:'从学前教室到写字楼',
     desc:'十年前你说"学前教育不是唯一的路"，投了无数简历才拿到第一个面试。十年后你成了团队里最被信任的人——也许是销售主管、运营经理或产品负责人。偶尔路过幼儿园听到儿歌声，你还会跟着哼——那是刻在骨子里的东西。',
   };
 
   // 2. 逆袭之王 — 专升本→考研→开挂
-  if (s.事业 >= 78 && s.财富 >= 65 && p === 'shenben') return {
+  if (s.事业 >= 78 && s.财富 >= 65 && p === 'academic') return {
     emoji:'👑', title:'逆袭之王', sub:'从专科到更远的地方',
     desc:'专升本那两年你每天早上六点起来背单词，晚上十点还在自习室。考上之后有人说"专升本的含金量不如直本"，你没理。后来你又考了研，甚至读了博。从专科教室到大学讲台，你走了十年。那些曾经质疑你的人，现在介绍你时会说"这是我朋友，特别励志"。',
   };
 
   // 3. 世界公民 — 出国路线走出来的人生
-  if (s.人脉 >= 78 && s.幸福 >= 72 && p === 'chuguo') return {
+  if (s.人脉 >= 78 && s.幸福 >= 72 && p === 'abroad') return {
     emoji:'🌏', title:'世界公民', sub:'地球就是你的游乐场',
     desc:'当年你说想出国看看，有人觉得你异想天开——一个大专生，能出国干什么？但你真的出去了。也许在澳洲摘过草莓，在东南亚做过青旅义工，在日本的幼儿园当过助教，或者在欧洲读了硕士。你在不同国家生活过，学会了好几门语言，认识的朋友遍布全球。十年后回头看，那个当初"异想天开"的决定，让你拥有了别人一辈子都不会有的人生厚度。',
   };
@@ -524,7 +584,19 @@ function getEnding() {
     desc:'你从一个小托管班做起，到后来开了三家幼儿园/托育中心。创业过程中被家长投诉过、被消防查过、被同行挖过墙角，但你都扛过来了。现在手底下管着几十号老师，家长排着队报名。有人说"一个大专生怎么可能"，你用十年告诉了所有人答案。',
   };
 
-  // 4. 创业达人
+  // 4. 内容创作者 — 创作路线走出来的
+  if (s.幸福 >= 75 && s.人脉 >= 70 && s.事业 >= 55 && cp === 'creative') return {
+    emoji:'🎬', title:'内容创作者', sub:'用作品说话的人',
+    desc:'你在网上积累了属于自己的观众/读者/粉丝。也许是一个万粉账号，也许是一本作品集，也许是一个有口碑的个人品牌。你不用朝九晚五，但你的手机24小时都在想选题。你喜欢这样的生活：用自己的方式表达，被懂你的人看见。学前教育给你的共情力和创造力，成了你内容里最独特的东西。',
+  };
+
+  // 5. 体制内赢家 — 安稳也是一种成就
+  if (s.财富 >= 65 && s.健康 >= 60 && s.幸福 >= 50 && s.事业 >= 50 && cp === 'civil') return {
+    emoji:'🏛️', title:'体制内赢家', sub:'铁饭碗端得稳稳的',
+    desc:'你考编上岸了。专科生能报的岗位少，你硬是从几十比一的竞争里杀了出来。不管是幼儿园编、小学编还是其他事业单位，你有了一个让父母安心的身份。五险一金齐全，逢年过节有福利，产假病假有保障。偶尔深夜你会想：如果选了更冒险的路会怎样？然后翻了个身安心睡了——安稳本身就是一种奢侈。',
+  };
+
+  // 6. 创业达人
   if (s.事业 >= 75 && s.人脉 >= 72 && s.财富 >= 58) return {
     emoji:'🚀', title:'创业达人', sub:'自己给自己发工资',
     desc:'你走了一条少有人走的路。也许是绘本馆、亲子餐厅、手工教具品牌，也许跟学前完全无关——开了家奶茶店、做了电商、搞了装修队。起起伏伏是常态，但你从来没后悔过。学前教育专业给你的不只是技能，更是跟人打交道的能力。这份能力帮你在任何行业里都吃得开。',
@@ -539,7 +611,7 @@ function getEnding() {
   // === 幸福生活类 ===
 
   // 6. 孩子王
-  if (s.幸福 >= 76 && s.人脉 >= 65 && s.健康 >= 60 && (p === 'youyuan' || s.幸福 >= 82)) return {
+  if (s.幸福 >= 76 && s.人脉 >= 65 && s.健康 >= 60 && (p === 'preschool' || s.幸福 >= 82)) return {
     emoji:'👩‍🏫', title:'孩子王', sub:'世界上最幸福的职业',
     desc:'你留在了幼儿园，成了孩子们最喜欢的老师。已经从配班做到了主班、年级组长，甚至业务园长。每天早上走进教室，一群小朋友喊着你的名字扑过来。月薪可能不如写字楼里的同学，但你有寒暑假、有双休、有家长的尊重和孩子们的拥抱。你一直记得实习时老园长说的话："做幼师发不了财，但能发福——心福。"',
   };
@@ -570,10 +642,10 @@ function getEnding() {
 
   // === 安稳幸福类 ===
 
-  // 11. 体制内赢家
+  // 11. 安稳人生
   if (s.财富 >= 65 && s.健康 >= 60 && s.幸福 >= 50 && s.事业 >= 50 && avg >= 58) return {
-    emoji:'💼', title:'体制内赢家', sub:'铁饭碗端稳了',
-    desc:'你考编上岸了。专科生能报的岗位本来就少，你硬是从几十比一的竞争里杀了出来。不管是幼儿园事业编、小学教师编还是其他事业单位，你有了一个稳定体面的身份。工资不算高但五险一金齐全，逢年过节有福利，产假病假有保障。偶尔深夜你会想：如果当年选了更冒险的路会怎样？然后翻了个身安心睡了——安稳本身就是一种奢侈品。',
+    emoji:'💼', title:'安稳人生', sub:'稳稳当当，岁月静好',
+    desc:'你也许没有大富大贵，但你有一个稳定的工作和体面的生活。五险一金齐全，逢年过节有福利，不用为下个月的房租发愁。父母终于放心了，你也终于能喘口气。偶尔深夜你会想：如果当年选了更冒险的路会怎样？然后看了看自己一步一步攒下来的小日子，觉得这样也挺好。稳定不是妥协，是另一种勇敢。',
   };
 
   // 12. 小镇之光
@@ -733,15 +805,16 @@ function renderStage(stageData) {
 }
 
 function showRandomEvent() {
-  // 选一个还没触发过的事件
-  const available = RANDOM_EVENTS.filter((_, i) => !game.eventsTriggered.has(i));
-  if (available.length === 0) return false;
-  const idx = RANDOM_EVENTS.indexOf(available[Math.floor(Math.random() * available.length)]);
-  const evt = RANDOM_EVENTS[idx];
-  game.eventsTriggered.add(idx);
+  const path = game.playerPath;
+  // 60% 概率触发路径专属事件，40% 通用事件
+  const usePathEvent = Math.random() < 0.6 && PATH_EVENTS[path] && PATH_EVENTS[path].length > 0;
+  const pool = usePathEvent ? PATH_EVENTS[path] : COMMON_EVENTS;
+
+  // 从池子里随机选一个
+  const evt = pool[Math.floor(Math.random() * pool.length)];
 
   const changes = applyEffects(evt.stats);
-  game.history.push({ type:'event', event: evt, changes });
+  game.history.push({ type:'event', event: evt, changes, path: game.playerPath });
 
   const overlay = document.createElement('div');
   overlay.className = 'event-popup';
@@ -753,10 +826,18 @@ function showRandomEvent() {
     statLines += `<div class="pop-stat ${cls}">${icons[c.key]} ${c.key} ${sign}${c.delta}</div>`;
   });
 
+  // 路径标签
+  const pathLabels = {
+    preschool:'🏫 学前路上', corporate:'💼 职场路上', startup:'🚀 创业路上',
+    academic:'📚 求学路上', creative:'🎨 创作路上', civil:'🏛️ 体制路上',
+    abroad:'✈️ 海外路上', explore:'🧭 探索路上'
+  };
+
   overlay.innerHTML = `
     <div class="popup-card">
       <span class="pop-emoji">${evt.emoji}</span>
       <div class="pop-title">${evt.title}</div>
+      <div style="font-size:11px;color:#8b7355;margin-bottom:6px;">${pathLabels[path] || ''}</div>
       <div class="pop-desc">${evt.desc}</div>
       ${statLines}
       <button class="pop-btn">知道了</button>
@@ -771,15 +852,44 @@ function showRandomEvent() {
   });
 }
 
+// 根据阶段和选择更新当前路径
+function updatePlayerPath(stage, choiceIdx) {
+  // 每个阶段的选项可能将玩家导向不同路径
+  const pathTransitions = {
+    // Stage 1 (毕业半年): [stay, stay, stay, stay, shift to freelance]
+    1: { 3: 'freelance', 4: 'creative' },
+    // Stage 2 (一年后): [stay, stay, shift to creative, shift to corporate, stay]
+    2: { 2: 'explore', 4: 'creative' },
+    // Stage 3 (两年后): 换赛道→corporate, 考编→civil, 副业→creative, 学编程→corporate
+    3: { 0: 'corporate', 2: 'civil', 3: 'creative', 4: 'corporate' },
+    // Stage 4 (三年之痒): 跳槽→corporate, 缓冲→explore, 做生意→startup
+    4: { 0: 'corporate', 3: 'explore', 4: 'startup' },
+    // Stage 5 (四年后): [corporate, stay, academic, explore]
+    5: { 0: 'corporate', 2: 'academic', 3: 'explore' },
+    // Stage 6 (六年): [stay, stay, stay, freelance/creative]
+    6: { 3: 'creative' },
+    // Stage 7 (八年聚会): no path changes, these are social choices
+  };
+
+  const transition = (pathTransitions[stage] || {})[choiceIdx];
+  if (transition) {
+    game.playerPath = transition;
+  }
+}
+
 async function handleChoice(stageData, choiceIdx) {
   const choice = stageData.choices[choiceIdx];
   const changes = applyEffects(choice.effects);
   game.history.push({ type:'choice', stage: game.stage, choice: choiceIdx, changes });
 
-  // 记录初始路线
+  // 记录初始路线 + 更新当前路径
   if (game.stage === 0) {
-    const paths = ['shenben', 'youyuan', 'zhuanhang', 'chuangye', 'chuguo'];
+    const paths = ['academic', 'preschool', 'corporate', 'startup', 'abroad'];
     game.firstChoice = paths[choiceIdx];
+    game.playerPath = paths[choiceIdx];
+  } else {
+    // 后续阶段：根据选择更新路径
+    updatePlayerPath(game.stage, choiceIdx);
   }
 
   game.stage++;
@@ -858,6 +968,8 @@ function resetGame() {
     history: [],
     eventsTriggered: new Set(),
     ended: false,
+    firstChoice: null,
+    playerPath: 'explore',
   };
   renderStage(STAGES[0]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
